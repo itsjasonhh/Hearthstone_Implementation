@@ -15,7 +15,8 @@ class Player:
         self.creatures = []
         self.deck = []
         self.hand = []
-        self.mana = 0
+        self.mana_crystals = 0
+        self.available_mana = 0
         self.graveyard = []
         self.fatigue = 0
     def __str__(self):
@@ -61,6 +62,38 @@ class Player:
         
         random.shuffle(self.deck)  
 
+    
+    def hero_power(self, player2):
+        if self.available_mana < 2:
+            print("Not enough mana!")
+            return
+        if self.name == 'Rogue':
+            self.weapon_durability = 2
+            self.attack = 1
+        elif self.name == 'Priest':
+            choices = {}
+            i = 2
+            choices[1] = self
+            for j in self.creatures:
+                choices[i] = j
+                i += 1
+            for k in player2.creatures: 
+                choices[i] = k
+                i += 1
+            choices[i] = player2
+            a = int(input('Select the number before the target you want to heal for 2 points: '))
+            if type(choices[a]) == Player:
+                if choices[a].life >= 28:
+                    choices[a].life = 30
+                else:
+                    choices[a].life += 2
+            else:
+                if choices[a].total_health - choices[a].current_health <= 2:
+                    choices[a].current_health = choices[a].total_health
+                else:
+                    choices[a].current_health += 2
+
+    
     #mulligan? initial draw?
     def draw_card(self):
         if len(self.deck) > 0:
@@ -71,7 +104,8 @@ class Player:
             self.fatigue += 1
             self.life -= self.fatigue
     def draw_phase(self):
-        self.mana += 1
+        self.mana_crystals += 1
+        self.available_mana = self.mana_crystals
         for i in self.creatures:
             i.can_attack = True
         self.draw_card()
