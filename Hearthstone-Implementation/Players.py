@@ -93,7 +93,30 @@ class Player:
                 else:
                     choices[a].current_health += 2
 
-    
+    #need to implement player combat as well
+    def hero_attack(self,target):
+        if self.attack < 1:
+            print("I can't attack!")
+            return
+        if type(target) == Cards.Creature:
+            target.available_health -= self.attack
+            if self.armor >= target.attack:
+                self.armor -= target.attack
+            elif (self.armor > 0 and self.armor < target.attack):
+                self.life -= (target.attack - self.armor)
+                self.armor = 0
+            else:
+                self.life -= target.attack
+        else:
+            if target.armor >= self.attack:
+                target.armor -= self.attack
+            elif (target.armor > 0 and target.armor < self.attack):
+                target.life -= (self.attack - target.armor)
+                target.armor = 0
+            else:
+                target.life -= self.attack
+
+
     #mulligan? initial draw?
     def draw_card(self):
         if len(self.deck) > 0:
@@ -109,6 +132,8 @@ class Player:
         for i in self.creatures:
             i.can_attack = True
         self.draw_card()
+
+
 
         
 

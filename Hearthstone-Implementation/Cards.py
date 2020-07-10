@@ -13,6 +13,25 @@ class Creature:
         return self.name
     def __repr__(self):
         return self.name
+    def check_if_alive(self):
+        if self.current_health > 0:
+            return True
+        else:
+            return False
+        
+    def combat(self,target):
+        if type(target) == Creature:
+            target.current_health -= self.attack
+            self.current_health -= target.attack
+        else:
+            if target.armor >= self.attack:
+                target.armor -= self.attack
+            elif (target.armor > 0 and target.armor < self.attack):
+                target.life -= (self.attack - target.armor)
+                target.armor = 0
+            else:
+                target.life -= self.attack
+                
 
 
 class Spell:
