@@ -114,6 +114,10 @@ class Player:
                 self.attack = 0
         return
 
+    def check_if_dead(self):
+        if self.life <= 0:
+            sys.exit(self.name + " lost the game!")
+        return
 
     #mulligan? initial draw?
     def draw_card(self):
@@ -172,28 +176,110 @@ class Player:
                     if type(choices[b]) == Cards.Creature:
                         self.play_creature(choices[b])
                         if choices[b].name == 'Elven Archer' or choices[b].name == 'Ironforge Rifleman':
-                            return
+                            c = int(input("Do you want to target a player or creature? Enter 1 for player, 2 for creature. "))
+                            if c == 1:
+                                d = int(input("Do you want to target yourself or the opponent? Enter 1 for yourself, 2 for the opponent. "))
+                                if d == 1:
+                                    if self.armor >= 1:
+                                        self.armor -= 1
+                                    else:
+                                        self.life -= 1
+                                        self.check_if_dead()
+                                elif d == 2:
+                                    if player2.armor >= 1:
+                                        player2.armor -= 1
+                                    else:
+                                        player2.life -= 1 
+                                        player2.check_if_dead()
+                            elif c == 2:
+                                creature_list = {}
+                                i_1 = 1
+                                for j in self.creatures:
+                                    creature_list[i_1] = j
+                                    i_1 += 1
+                                for k in player2.creatures:
+                                    creature_list[i_1] = k
+                                    i_1 += 1
+                                print(creature_list)
+                                e = int(input("Enter the number of the creature to target: "))
+                                creature_list[e].current_health -= 1
+                                if creature_list[e].check_if_dead():
+                                    if creature_list[e] in self.creatures:
+                                        self.graveyard.append(creature_list[e])
+                                        self.creatures.remove(creature_list[e])
+                                    elif creature_list[e] in player2.creatures:
+                                        player2.graveyard.append(creature_list[e])
+                                        player2.creatures.remove(creature_list[e])
                         elif choices[b].name == 'Darkscale Healer':
-                            return
+                            for creature in self.creatures:
+                                creature.available_health += 2
+                                if creature.available_health > creature.total_health:
+                                    creature.available_health = creature.total_health
+                            self.life += 2
+                            if self.life > 30:
+                                self.life = 30
                         elif choices[b].name == 'Nightblade': 
                             if player2.armor >= 3:
                                 player2.armor -= 3
                             elif player2.armor < 3 and player2.armor > 0:
                                 player2.life -= (3 - player2.armor)
                                 player2.armor = 0
+                                player2.check_if_dead()
                             else:
-                                player2.life -= 3 
+                                player2.life -= 3
+                                player2.check_if_dead() 
                             return
                         elif choices[b].name == 'Novice Engineer' or choices[b].name == 'Gnomish Inventor':
                             self.draw_card()
                         elif choices[b].name == 'Dragonling Mechanic':
-                            return
+                            self.creatures.append(Cards.Creature("Mechanical Dragonling",1,2,1,"Mech",False,False))
                         elif choices[b].name == 'Stormpike Commando':
-                            return
+                            c = int(input("Do you want to target a player or creature? Enter 1 for player, 2 for creature. "))
+                            if c == 1:
+                                d = int(input("Do you want to target yourself or the opponent? Enter 1 for yourself, 2 for the opponent. "))
+                                if d == 1:
+                                    if self.armor >= 2:
+                                        self.armor -= 2
+                                    elif self.armor == 1:
+                                        self.life -= 1
+                                        self.armor = 0
+                                        self.check_if_dead()
+                                    else:
+                                        self.life -= 2
+                                        self.check_if_dead()
+                                elif d == 2:
+                                    if player2.armor >= 2:
+                                        player2.armor -= 2
+                                    elif player2.armor == 1:
+                                        player2.life -= 1
+                                        player2.armor = 0
+                                        player2.check_if_dead()
+                                    else:
+                                        player2.life -= 2 
+                                        player2.check_if_dead()
+                            elif c == 2:
+                                creature_list = {}
+                                i_2 = 1
+                                for j in self.creatures:
+                                    creature_list[i_2] = j
+                                    i_2 += 1
+                                for k in player2.creatures:
+                                    creature_list[i_2] = k
+                                    i_2 += 1
+                                print(creature_list)
+                                e = int(input("Enter the number of the creature to target: "))
+                                creature_list[e].current_health -= 2
+                                if creature_list[e].check_if_dead():
+                                    if creature_list[e] in self.creatures:
+                                        self.graveyard.append(creature_list[e])
+                                        self.creatures.remove(creature_list[e])
+                                    elif creature_list[e] in player2.creatures:
+                                        player2.graveyard.append(creature_list[e])
+                                        player2.creatures.remove(creature_list[e])
                     
                         
                     elif type(choices[b]) == Cards.Spell:
-
+                        return
 
             elif a == 2:
                 if self.hero_power_used:
@@ -221,6 +307,7 @@ class Player:
         for k in player2.creatures:
             if k.current_health == j.total_health:
                 choices[i] = k
+                i += 1
         print(choices)
         a = int(input("Enter the number of the target, or 0 to cancel"))
         if a == 0:
