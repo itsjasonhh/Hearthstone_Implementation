@@ -24,7 +24,7 @@ class Player:
     
     def create_deck(self):
         if self.name == 'Rogue':
-            for i in range(2):
+            for _ in range(2):
                 self.deck.append(Cards.Spell('Backstab',0))
                 self.deck.append(Cards.Spell('Deadly Poison',1))
                 self.deck.append(Cards.Creature('Elven Archer',1,1,1,None,False,False))
@@ -42,7 +42,7 @@ class Player:
                 self.deck.append(Cards.Creature('Stormpike Commando',5,4,2,None,False,False))  
         
         if self.name == 'Druid':
-            for i in range(2):
+            for _ in range(2):
                 self.deck.append(Cards.Spell('Innervate',0))
                 self.deck.append(Cards.Spell('Claw',1))
                 self.deck.append(Cards.Creature('Elven Archer',1,1,1,None,False,False))
@@ -63,37 +63,17 @@ class Player:
         random.shuffle(self.deck)  
 
     
-    def hero_power(self, player2):
+    def hero_power(self):
         if self.available_mana < 2:
             print("Not enough mana!")
             return
         if self.name == 'Rogue':
             self.weapon_durability = 2
-            self.attack = 1
-        elif self.name == 'Priest':
-            choices = {}
-            i = 2
-            choices[1] = self
-            for j in self.creatures:
-                choices[i] = j
-                i += 1
-            for k in player2.creatures: 
-                choices[i] = k
-                i += 1
-            choices[i] = player2
-            a = int(input('Select the number before the target you want to heal for 2 points: '))
-            if type(choices[a]) == Player:
-                if choices[a].life >= 28:
-                    choices[a].life = 30
-                else:
-                    choices[a].life += 2
-            else:
-                if choices[a].total_health - choices[a].current_health <= 2:
-                    choices[a].current_health = choices[a].total_health
-                else:
-                    choices[a].current_health += 2
+            self.attack += 1
+        elif self.name == 'Druid':
+            self.attack += 1
+            self.armor += 1
 
-    #need to implement player combat as well
     def hero_attack(self,target):
         if self.attack < 1:
             print("I can't attack!")
@@ -115,6 +95,10 @@ class Player:
                 target.armor = 0
             else:
                 target.life -= self.attack
+        if self.weapon_durability > 0:
+            self.weapon_durability -= 1
+            if self.weapon_durability == 0:
+                self.attack = 0
 
 
     #mulligan? initial draw?
@@ -125,13 +109,26 @@ class Player:
                 self.graveyard.append(self.hand.pop())
         else:
             self.fatigue += 1
-            self.life -= self.fatigue
+            if self.armor == 0:
+                self.life -= self.fatigue
+            elif self.armor > 0 and self.armor < self.fatigue:
+                self.armor = 0
+                self.life -= (self.fatigue - self.armor)
+            elif self.armor >= self.fatigue:
+                self.armor -= self.fatigue
     def draw_phase(self):
         self.mana_crystals += 1
         self.available_mana = self.mana_crystals
         for i in self.creatures:
             i.can_attack = True
         self.draw_card()
+    
+    def end_phase(self):
+        if self.name == 'Druid':
+            self.attack = 0
+        
+    
+    
 
 
 
