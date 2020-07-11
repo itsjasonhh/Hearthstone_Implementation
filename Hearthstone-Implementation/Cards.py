@@ -10,9 +10,9 @@ class Creature:
         self.tag = tag
         self.taunt = taunt
     def __str__(self):
-        return self.name
+        return self.name + ": " + str(self.attack) + "/" + str(self.current_health)
     def __repr__(self):
-        return self.name
+        return self.name + ": " + str(self.attack) + "/" + str(self.current_health)
     def check_if_dead(self):
         if self.current_health <= 0:
             return True

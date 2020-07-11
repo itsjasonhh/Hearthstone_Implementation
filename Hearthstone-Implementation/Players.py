@@ -2,6 +2,8 @@ import sys
 import Cards
 import random
 
+#you and your_opponent are Player class
+
 class Player:
     #name must be "Rogue or Druid"
     def __init__(self, name):
@@ -62,6 +64,15 @@ class Player:
 
         
         random.shuffle(self.deck)  
+    def print_board_and_info(self,your_opponent):
+        print("Your hand: ")
+        print(self.hand)
+        print("Your creatures: ")
+        print(self.creatures)
+        print("Your opponent has " + str(len(your_opponent.hand)) + " cards in hand.")
+        print("Your opponent's creatures: ")
+        print(your_opponent.creatures)
+        return
 
     
     def hero_power(self):
@@ -128,8 +139,21 @@ class Player:
         self.draw_card()
         return
     
-    def main_phase(self):
+    #this function is used to discard the spell AFTER its effect is used. spell effects are coded elsewhere
+    def play_spell(self, card):
+        self.graveyard.append(card)
+        self.hand.remove(card)
+        return
+    
+    #this function is used to play a creature to the board. Battlecries are coded elsewhere
+    def play_creature(self, card):
+        self.creatures.append(card)
+        self.hand.remove(card)
+        return
+    
+    def main_phase(self,player2):
         while True:
+            self.print_board_and_info(player2)
             a = int(input("What would you like to do? \n1. Play a card. \n2. Use your hero power. \n3. Attack with creatures. \n4. Attack with your hero. \n0. End your turn.\n"))
             if a == 0:
                 return
@@ -140,25 +164,36 @@ class Player:
                     if j.cost <= self.available_mana:
                         choices[i] = j
                         i += 1
-                print(choices)
-                b = int(input('Enter the number of the card to play: '))
-                #Need to add card effects here.
-                if type(choices[b]) == Cards.Creature:
-                    if choices[b].name == 'Elven Archer' or choices[b].name == 'Ironforge Rifleman':
-                        return
-                    elif choices[b].name == 'Darkscale Healer':
-                        return
-                    elif choices[b].name == 'Nightblade': 
-                        return
-                    elif choices[b].name == 'Novice Engineer' or choices[b].name == 'Gnomish Inventor':
-                        return
-                    elif choices[b].name == 'Dragonling Mechanic':
-                        return
-                    elif choices[b].name == 'Stormpike Commando':
-                        return
+                if len(choices) == 0:
+                    print("Can't play any cards!")
+                else:
+                    print(choices)
+                    b = int(input('Enter the number of the card to play: '))
+                    if type(choices[b]) == Cards.Creature:
+                        self.play_creature(choices[b])
+                        if choices[b].name == 'Elven Archer' or choices[b].name == 'Ironforge Rifleman':
+                            return
+                        elif choices[b].name == 'Darkscale Healer':
+                            return
+                        elif choices[b].name == 'Nightblade': 
+                            if player2.armor >= 3:
+                                player2.armor -= 3
+                            elif player2.armor < 3 and player2.armor > 0:
+                                player2.life -= (3 - player2.armor)
+                                player2.armor = 0
+                            else:
+                                player2.life -= 3 
+                            return
+                        elif choices[b].name == 'Novice Engineer' or choices[b].name == 'Gnomish Inventor':
+                            self.draw_card()
+                        elif choices[b].name == 'Dragonling Mechanic':
+                            return
+                        elif choices[b].name == 'Stormpike Commando':
+                            return
                     
-                    self.creatures.append(choices[b])
-                    self.hand.remove(choices[b])
+                        
+                    elif type(choices[b]) == Cards.Spell:
+
 
             elif a == 2:
                 if self.hero_power_used:
@@ -199,14 +234,19 @@ class Player:
                 elif choices[a] in player2.creatures:
                     player2.graveyard.append(choices[a])
                     player2.creatures.remove(choices[a])
-              
+        
 
 
 #after using card, need to remove that card from hand and into graveyard.
 
     
 a = Player("Rogue")
-a.main_phase()
+b = Player("Druid")
+a.create_deck()
+b.create_deck()
+b.draw_card()
+a.draw_phase()
+a.main_phase(b)
 
 
 
