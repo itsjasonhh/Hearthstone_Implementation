@@ -143,6 +143,23 @@ class Player:
                 print(choices)
                 b = int(input('Enter the number of the card to play: '))
                 #Need to add card effects here.
+                if type(choices[b]) == Cards.Creature:
+                    if choices[b].name == 'Elven Archer' or choices[b].name == 'Ironforge Rifleman':
+                        return
+                    elif choices[b].name == 'Darkscale Healer':
+                        return
+                    elif choices[b].name == 'Nightblade': 
+                        return
+                    elif choices[b].name == 'Novice Engineer' or choices[b].name == 'Gnomish Inventor':
+                        return
+                    elif choices[b].name == 'Dragonling Mechanic':
+                        return
+                    elif choices[b].name == 'Stormpike Commando':
+                        return
+                    
+                    self.creatures.append(choices[b])
+                    self.hand.remove(choices[b])
+
             elif a == 2:
                 if self.hero_power_used:
                     print("Can't use your hero power more than once per turn!")
@@ -159,7 +176,34 @@ class Player:
         self.hero_power_used = False
         return
     
-        
+    def backstab(self,player2):
+        choices = {}
+        i = 1
+        for j in self.creatures:
+            if j.current_health == j.total_health:
+                choices[i] = j
+                i += 1
+        for k in player2.creatures:
+            if k.current_health == j.total_health:
+                choices[i] = k
+        print(choices)
+        a = int(input("Enter the number of the target, or 0 to cancel"))
+        if a == 0:
+            return
+        else:
+            choices[a].current_health -= 2
+            if choices[a].check_if_dead():
+                if choices[a] in self.creatures:
+                    self.graveyard.append(choices[a])
+                    self.creatures.remove(choices[a])
+                elif choices[a] in player2.creatures:
+                    player2.graveyard.append(choices[a])
+                    player2.creatures.remove(choices[a])
+              
+
+
+#after using card, need to remove that card from hand and into graveyard.
+
     
 a = Player("Rogue")
 a.main_phase()

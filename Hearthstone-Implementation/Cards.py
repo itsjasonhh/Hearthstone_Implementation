@@ -13,8 +13,8 @@ class Creature:
         return self.name
     def __repr__(self):
         return self.name
-    def check_if_alive(self):
-        if self.current_health > 0:
+    def check_if_dead(self):
+        if self.current_health <= 0:
             return True
         else:
             return False
