@@ -19,6 +19,7 @@ class Player:
         self.available_mana = 0
         self.graveyard = []
         self.fatigue = 0
+        self.hero_power_used = False
     def __str__(self):
         return self.name + ': Life = ' + str(self.life)
     
@@ -69,10 +70,11 @@ class Player:
             return
         if self.name == 'Rogue':
             self.weapon_durability = 2
-            self.attack += 1
+            self.attack = 1
         elif self.name == 'Druid':
             self.attack += 1
             self.armor += 1
+        return
 
     def hero_attack(self,target):
         if self.attack < 1:
@@ -99,6 +101,7 @@ class Player:
             self.weapon_durability -= 1
             if self.weapon_durability == 0:
                 self.attack = 0
+        return
 
 
     #mulligan? initial draw?
@@ -116,19 +119,50 @@ class Player:
                 self.life -= (self.fatigue - self.armor)
             elif self.armor >= self.fatigue:
                 self.armor -= self.fatigue
+        return
     def draw_phase(self):
         self.mana_crystals += 1
         self.available_mana = self.mana_crystals
         for i in self.creatures:
             i.can_attack = True
         self.draw_card()
+        return
+    
+    def main_phase(self):
+        while True:
+            a = int(input("What would you like to do? \n1. Play a card. \n2. Use your hero power. \n3. Attack with creatures. \n4. Attack with your hero. \n0. End your turn.\n"))
+            if a == 0:
+                return
+            elif a == 1:
+                choices = {}
+                i = 1
+                for j in self.hand:
+                    if j.cost <= self.available_mana:
+                        choices[i] = j
+                        i += 1
+                print(choices)
+                b = int(input('Enter the number of the card to play: '))
+                #Need to add card effects here.
+            elif a == 2:
+                if self.hero_power_used:
+                    print("Can't use your hero power more than once per turn!")
+                else:
+                    self.hero_power_used = True
+                    self.hero_power()
+            
     
     def end_phase(self):
         if self.name == 'Druid':
             self.attack = 0
+        if self.weapon_durability == 0:
+            self.attack = 0
+        self.hero_power_used = False
+        return
+    
         
     
-    
+a = Player("Rogue")
+a.main_phase()
 
 
 
