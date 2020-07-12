@@ -22,6 +22,7 @@ class Player:
         self.graveyard = []
         self.fatigue = 0
         self.hero_power_used = False
+        self.can_attack = True
     def __str__(self):
         return self.name + ': Life = ' + str(self.life)
     
@@ -279,14 +280,144 @@ class Player:
                     
                         
                     elif type(choices[b]) == Cards.Spell:
-                        return
+                        self.play_spell(choices[b])
+                        if choices[b].name == 'Backstab':
+                            targets = {}
+                            i_3 = 1
+                            for j in self.creatures:
+                                if j.current_health == j.total_health:
+                                    targets[i_3] = j
+                                    i_3 += 1
+                            for k in player2.creatures:
+                                if k.current_health == k.total_health:
+                                    targets[i_3] = k
+                                    i_3 += 1
+                            print(targets)
+                            choice = int(input("Enter the number of the target: "))
+                            targets[choice].current_health -= 2
+                            if targets[choice].check_if_dead():
+                                if targets[choice] in self.creatures:
+                                    self.graveyard.append(targets[choice])
+                                    self.creatures.remove(targets[choice])
+                                elif targets[choice] in player2.creatures:
+                                    player2.graveyard.append(targets[choice])
+                                    player2.creatures.remove(targets[choice])
+                        
+                        elif choices[b].name == 'Deadly Poison':
+                            if self.weapon_durability == 0:
+                                print("Can't play this without a weapon equipped!")
+                            else:
+                                self.attack += 2
+                        
+                        elif choices[b].name == 'Sinister Strike':
+                            if player2.armor >= 3:
+                                player2.armor -= 3
+                            elif player2.armor > 0 and player2.armor < 3:
+                                player2.life -= (3 - player2.armor)
+                                player2.armor = 0
+                                player2.check_if_dead()
+                            else:
+                                player2.life -= 3
+                                player2.check_if_dead()
+                        
+                        elif choices[b].name == 'Sap':
+                            if len(player2.creatures) == 0:
+                                print("No available targets!")
+                            targets = {}
+                            i_4 = 1
+                            for c in player2.creatures:
+                                targets[i_4] = c
+                                i_4 += 1
+                            print(targets)
+                            s = int(input("Enter the number of the target: "))
+                            if len(player2.hand) >= 10:
+                                player2.graveyard.append(targets[s])
+                                player2.creatures.remove(targets[s])
+                            else:
+                                player2.hand.append(targets[s])
+                                player2.creatures.remove(targets[s])
+                        
+                        elif choices[b].name == 'Assassinate':
+                            targets = {}
+                            i_5 = 1
+                            for c in player2.creatures:
+                                targets[i_5] = c
+                                i_5 += 1
+                            print(targets)
+                            s = int(input("Enter the number of the target: "))
+                            player2.graveyard.append(targets[s])
+                            player2.creatures.remove(targets[s])
 
+                        elif choices[b].name == 'Innervate':
+                            self.available_mana += 1
+
+                        elif choices[b].name == 'Claw':
+                            self.armor += 2
+                            self.attack += 2
+
+                        elif choices[b].name == 'Mark of the Wild':
+                            targets = {}
+                            i_6 = 1
+                            for j in self.creatures:
+                                if j.current_health == j.total_health:
+                                    targets[i_6] = j
+                                    i_6 += 1
+                            for k in player2.creatures:
+                                if k.current_health == k.total_health:
+                                    targets[i_6] = k
+                                    i_6 += 1
+                            print(targets)
+                            choice = int(input("Enter the number of the target: "))
+                            targets[choice].taunt = True
+                            targets[choice].attack += 2
+                            targets[choice].current_health += 2
+                        
+                        elif choices[b].name == 'Wild Growth':
+                            self.mana_crystals += 1
+                        
+                        elif choices[b].name == 'Healing Touch':
+                            r = int(input('Do you want to target a player or creature? Enter 1 for player, 2 for creature: '))
+                            if r == 1:
+                                s = int(input('Do you want to target yourself or the opponent? Enter 1 for yourself, 2 for the opponent: '))
+                                if s == 1:
+                                    self.life += 8
+                                    if self.life > 30:
+                                        self.life = 30
+                                elif s == 2:
+                                    player2.life += 8
+                                    if player2.life > 30:
+                                        player2.life = 30
+
+                            elif r == 2:  
+                                targets = {}
+                                i_7 = 1
+                                for j in self.creatures:
+                                    targets[i_7] = j
+                                    i_7 += 1
+                                for k in player2.creatures:
+                                    targets[i_7] = k
+                                    i_7 += 1
+                                print(targets)
+                                t = int(input("Enter the number of the target: "))
+                                targets[t].current_health += 8
+                                if targets[t].current_health > targets[t].total_health:
+                                    targets[t].current_health = targets[t].total_health
+                          
             elif a == 2:
                 if self.hero_power_used:
                     print("Can't use your hero power more than once per turn!")
                 else:
                     self.hero_power_used = True
                     self.hero_power()
+            
+            elif a == 3:
+                #Attacking with creatures
+            
+            elif a == 4:
+                #Attacking with hero
+                if self.can_attack == False:
+                    print("Already attacked this turn!")
+                
             
     
     def end_phase(self):
@@ -297,30 +428,6 @@ class Player:
         self.hero_power_used = False
         return
     
-    def backstab(self,player2):
-        choices = {}
-        i = 1
-        for j in self.creatures:
-            if j.current_health == j.total_health:
-                choices[i] = j
-                i += 1
-        for k in player2.creatures:
-            if k.current_health == j.total_health:
-                choices[i] = k
-                i += 1
-        print(choices)
-        a = int(input("Enter the number of the target, or 0 to cancel"))
-        if a == 0:
-            return
-        else:
-            choices[a].current_health -= 2
-            if choices[a].check_if_dead():
-                if choices[a] in self.creatures:
-                    self.graveyard.append(choices[a])
-                    self.creatures.remove(choices[a])
-                elif choices[a] in player2.creatures:
-                    player2.graveyard.append(choices[a])
-                    player2.creatures.remove(choices[a])
         
 
 
