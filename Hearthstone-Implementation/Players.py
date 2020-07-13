@@ -101,7 +101,7 @@ class Player:
                 self.armor = 0
             else:
                 self.life -= target.attack
-        else:
+        elif type(target) == Player:
             if target.armor >= self.attack:
                 target.armor -= self.attack
             elif (target.armor > 0 and target.armor < self.attack):
@@ -141,6 +141,8 @@ class Player:
         self.available_mana = self.mana_crystals
         for i in self.creatures:
             i.can_attack = True
+        self.can_attack = True
+        self.hero_power_used = False
         self.draw_card()
         return
     
@@ -159,7 +161,7 @@ class Player:
     def main_phase(self,player2):
         while True:
             self.print_board_and_info(player2)
-            a = int(input("What would you like to do? \n1. Play a card. \n2. Use your hero power. \n3. Attack with creatures. \n4. Attack with your hero. \n0. End your turn.\n"))
+            a = int(input("What would you like to do? \n0. End your turn.\n1. Play a card. \n2. Use your hero power. \n3. Attack with creatures. \n4. Attack with your hero. \n"))
             if a == 0:
                 return
             elif a == 1:
@@ -412,39 +414,93 @@ class Player:
             
             elif a == 3:
                 #Attacking with creatures
+                if len(self.creatures) == 0:
+                    print("You don't have any creatures!")
+                else:
+                    attacking_creatures = {}
+                    temp = 1
+                    for c in self.creatures:
+                        if c.can_attack == True:
+                            attacking_creatures[temp] = c
+                            temp += 1
+                    print(attacking_creatures)
+                    f = int(input("Enter the number of the attacking creature: "))
+                    defenders = {}
+                    d = 1
+                    taunt_played = False
+                    for c in player2.creatures:
+                        if c.taunt == True:
+                            taunt_played = True
+                            defenders[d] = c
+                            d += 1
+                    if taunt_played == False:
+                        defenders[0] = player2
+                        for c in player2.creatures:
+                            defenders[d] = c
+                            d += 1
+                    print(defenders)
+                    g = int(input("Enter the number of the target of the attack: "))
+                    if g == 0:
+                            attacking_creatures[f].combat(defenders[g])
+                            defnders[g].check_if_dead()        
+                    else:
+                        attacking_creatures[f].combat(defenders[g])
+                        if attacking_creatures[f].check_if_dead():
+                            self.graveyard.append(attacking_creatures[f])
+                            self.creatures.remove(attacking_creatures[f])
+                        if defenders[g].check_if_dead():
+                            player2.graveyard.append(defenders[g])
+                            player2.creatures.remove(defenders[g])
+
+                
             
             elif a == 4:
                 #Attacking with hero
                 if self.can_attack == False:
                     print("Already attacked this turn!")
-                
-            
-    
+                else:
+                    hero_targets = {}
+                    i_10 = 1
+                    taunt_played = False
+                    for d in player2.creatures:
+                        if d.taunt == True:
+                            taunt_played = True
+                            hero_targets[i_10] = d
+                            d += 1
+                    if taunt_played == False:
+                        hero_targets[0] = player2
+                        for c in player2.creatures:
+                            hero_targets[i_10] = c
+                    print(hero_targets)
+                    g = int(input("Enter the number of the target of the attack: "))
+                    if g == 0:
+                        self.hero_attack(hero_targets[g])
+                        hero_targets[g].check_if_dead()
+                    else:
+                        self.hero_attack(hero_targets[g])
+                        self.check_if_dead()
+                        if hero_targets[g].check_if_dead():
+                            player2.graveyard.append(hero_targets[g])
+                            player2.creatures.remove(hero_targets[g])
+      
     def end_phase(self):
         if self.name == 'Druid':
             self.attack = 0
-        if self.weapon_durability == 0:
-            self.attack = 0
-        self.hero_power_used = False
         return
-    
+  
         
 
 
-#after using card, need to remove that card from hand and into graveyard.
+
 
     
-a = Player("Rogue")
-b = Player("Druid")
-a.create_deck()
-b.create_deck()
-b.draw_card()
-a.draw_phase()
-a.main_phase(b)
-
-
-
-        
+# a = Player("Rogue")
+# b = Player("Druid")
+# a.create_deck()
+# b.create_deck()
+# b.draw_card()
+# a.draw_phase()
+# a.main_phase(b)
 
 
 
