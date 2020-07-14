@@ -23,7 +23,7 @@ class Creature:
         if type(target) == Creature:
             target.current_health -= self.attack
             self.current_health -= target.attack
-        elif type(target) == Players.Player:
+        else:
             if target.armor >= self.attack:
                 target.armor -= self.attack
             elif (target.armor > 0 and target.armor < self.attack):
